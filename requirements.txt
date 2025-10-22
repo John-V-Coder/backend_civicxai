@@ -143,5 +143,3 @@ wrapt==2.0.0
 yarl==1.22.0
 
 
-# install Hyperon directly from GitHub
-git+https://github.com/trueagi-io/hyperon-experimental.git

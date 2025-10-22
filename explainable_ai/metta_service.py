@@ -24,6 +24,11 @@ def calculate_priority(poverty_index, project_impact, environmental_score, corru
     Returns:
         dict: Priority calculation results with score, level, allocation, etc.
     """
+    # Initialize priority_score with fallback calculation
+    priority_score = calculate_priority_python(
+        poverty_index, project_impact, environmental_score, corruption_risk
+    )
+    
     try:
         # Try to use MeTTa engine if available
         from hyperon import MeTTa, Environment
@@ -62,10 +67,23 @@ def calculate_priority(poverty_index, project_impact, environmental_score, corru
         # Execute MeTTa code
         result = metta.run(metta_code)
         
-        # Parse MeTTa result
-        if result and len(result) > 0:
-            priority_score = float(str(result[-1][0]))
-        else:
+        # Parse MeTTa result - handle various return types
+        try:
+            if result and len(result) > 0:
+                # Try to extract float from result
+                result_value = result[-1]
+                if isinstance(result_value, (list, tuple)) and len(result_value) > 0:
+                    result_value = result_value[0]
+                
+                # Convert to float
+                priority_score = float(str(result_value))
+            else:
+                # Fallback to Python calculation
+                priority_score = calculate_priority_python(
+                    poverty_index, project_impact, environmental_score, corruption_risk
+                )
+        except (ValueError, TypeError, AttributeError) as parse_error:
+            print(f"Could not parse MeTTa result: {parse_error}, using Python fallback")
             # Fallback to Python calculation
             priority_score = calculate_priority_python(
                 poverty_index, project_impact, environmental_score, corruption_risk
@@ -74,6 +92,13 @@ def calculate_priority(poverty_index, project_impact, environmental_score, corru
     except Exception as e:
         # Fallback to Python calculation if MeTTa fails
         print(f"MeTTa engine not available, using Python fallback: {e}")
+        # priority_score already initialized with Python calculation
+    
+    # Ensure priority_score is a valid float
+    try:
+        priority_score = float(priority_score)
+    except (ValueError, TypeError):
+        # Ultimate fallback
         priority_score = calculate_priority_python(
             poverty_index, project_impact, environmental_score, corruption_risk
         )
