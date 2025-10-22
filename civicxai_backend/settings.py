@@ -78,7 +78,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'civicxai_backend.wsgi.application'
+WSGI_APPLICATION = 'civicxai_backend.wsgi'
 
 # CORS settings (for React frontend)
 # --- CORS Settings ---

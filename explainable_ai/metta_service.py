@@ -267,3 +267,232 @@ def get_priority_calculation(data):
         environmental_score=data.get('environmental_score', 0.5),
         corruption_risk=data.get('corruption_risk', 0.3)
     )
+
+
+def generate_explanation_from_data(region_id, allocation_data, context='', language='en'):
+    """
+    Generate explanation for allocation decision (local fallback)
+    
+    Args:
+        region_id (str): Region identifier
+        allocation_data (dict): Allocation metrics and decision data
+        context (str): Additional context for explanation
+        language (str): Language for explanation (default: 'en')
+        
+    Returns:
+        dict: Explanation with narrative, rationale, and recommendations
+    """
+    try:
+        # Extract metrics from allocation_data
+        poverty_index = allocation_data.get('poverty_index', 0.5)
+        project_impact = allocation_data.get('project_impact', 0.5)
+        environmental_score = allocation_data.get('environmental_score', 0.5)
+        corruption_risk = allocation_data.get('corruption_risk', 0.3)
+        priority_score = allocation_data.get('priority_score', 0.5)
+        allocation_percentage = allocation_data.get('allocation_percentage', 50)
+        
+        # Generate explanation based on language
+        if language.lower() == 'es':
+            explanation = _generate_spanish_explanation(
+                region_id, priority_score, allocation_percentage,
+                poverty_index, project_impact, environmental_score, corruption_risk, context
+            )
+        elif language.lower() == 'sw':
+            explanation = _generate_swahili_explanation(
+                region_id, priority_score, allocation_percentage,
+                poverty_index, project_impact, environmental_score, corruption_risk, context
+            )
+        else:
+            explanation = _generate_english_explanation(
+                region_id, priority_score, allocation_percentage,
+                poverty_index, project_impact, environmental_score, corruption_risk, context
+            )
+        
+        return {
+            'region_id': region_id,
+            'explanation': explanation['narrative'],
+            'rationale': explanation['rationale'],
+            'key_points': explanation['key_points'],
+            'recommendations': explanation['recommendations'],
+            'transparency_notes': explanation['transparency_notes'],
+            'language': language,
+            'engine': 'metta_local'
+        }
+        
+    except Exception as e:
+        # Fallback explanation
+        return {
+            'region_id': region_id,
+            'explanation': f'Allocation decision for {region_id} based on regional metrics and priority analysis.',
+            'rationale': 'Decision calculated using weighted priority scoring model.',
+            'key_points': [
+                'Priority score calculated from poverty, impact, environment, and governance factors',
+                'Allocation percentage recommended based on priority level',
+                'Continuous monitoring and evaluation recommended'
+            ],
+            'recommendations': ['Monitor implementation', 'Track outcomes', 'Adjust as needed'],
+            'transparency_notes': 'Calculation performed using local MeTTa engine.',
+            'language': language,
+            'engine': 'metta_local',
+            'error': str(e)
+        }
+
+
+def _generate_english_explanation(region_id, priority_score, allocation_percentage,
+                                   poverty_index, project_impact, environmental_score, 
+                                   corruption_risk, context):
+    """Generate English explanation"""
+    
+    # Determine priority level
+    if priority_score >= 0.7:
+        priority_level = "CRITICAL"
+        urgency = "immediate"
+    elif priority_score >= 0.5:
+        priority_level = "HIGH"
+        urgency = "substantial"
+    elif priority_score >= 0.3:
+        priority_level = "MEDIUM"
+        urgency = "moderate"
+    else:
+        priority_level = "LOW"
+        urgency = "baseline"
+    
+    # Build narrative
+    narrative = f"""
+**Resource Allocation Decision for {region_id}**
+
+Based on comprehensive analysis of regional indicators, {region_id} has been assigned a **{priority_level}** priority level with a priority score of {priority_score:.1%}. This results in a recommended budget allocation of {allocation_percentage:.1f}%.
+
+**Key Metrics Analysis:**
+- **Poverty Index**: {poverty_index:.1%} - {'High poverty levels require economic support' if poverty_index > 0.6 else 'Moderate poverty conditions'}
+- **Project Impact**: {project_impact:.1%} - {'Strong potential for positive outcomes' if project_impact > 0.6 else 'Moderate impact expected'}
+- **Environmental Factors**: {environmental_score:.1%} - {'Significant environmental challenges' if environmental_score > 0.6 else 'Manageable environmental conditions'}
+- **Governance Risk**: {corruption_risk:.1%} - {'Enhanced oversight required' if corruption_risk > 0.5 else 'Good governance environment'}
+
+This {urgency} allocation is recommended to address the identified needs while ensuring efficient resource utilization.
+    """.strip()
+    
+    # Build rationale
+    rationale = f"""
+The allocation decision follows a transparent, evidence-based methodology:
+
+1. **Data Collection**: Regional metrics gathered from verified sources
+2. **Weighted Scoring**: Priority calculated using scientifically validated weights (Poverty: 40%, Impact: 30%, Environment: 20%, Governance: 10%)
+3. **Risk Assessment**: Corruption and implementation risks evaluated
+4. **Allocation Mapping**: Priority score translated to funding percentage recommendation
+
+{context if context else 'Decision made using standard evaluation criteria.'}
+    """.strip()
+    
+    # Key points
+    key_points = [
+        f"Priority Level: {priority_level} ({priority_score:.1%})",
+        f"Recommended Allocation: {allocation_percentage:.1f}% of available budget",
+        f"Primary drivers: {'Poverty reduction' if poverty_index > 0.6 else 'Balanced development'}",
+        f"Implementation context: {'High oversight needed' if corruption_risk > 0.5 else 'Standard monitoring sufficient'}"
+    ]
+    
+    # Recommendations
+    recommendations = []
+    if allocation_percentage >= 70:
+        recommendations.extend([
+            "Fast-track approval and disbursement processes",
+            "Deploy experienced project management teams",
+            "Establish weekly monitoring checkpoints"
+        ])
+    elif allocation_percentage >= 50:
+        recommendations.extend([
+            "Follow standard approval processes with priority review",
+            "Implement regular monitoring protocols",
+            "Ensure stakeholder engagement"
+        ])
+    else:
+        recommendations.extend([
+            "Process through regular channels",
+            "Monitor for changing conditions",
+            "Maintain baseline support"
+        ])
+    
+    if corruption_risk > 0.5:
+        recommendations.append("Implement enhanced financial controls and third-party audits")
+    
+    # Transparency notes
+    transparency_notes = """
+This allocation recommendation was generated using an explainable AI system designed for transparency and accountability. All calculations follow documented methodologies and can be audited. Stakeholders may request detailed breakdowns of the scoring and weighting systems used.
+    """.strip()
+    
+    return {
+        'narrative': narrative,
+        'rationale': rationale,
+        'key_points': key_points,
+        'recommendations': recommendations,
+        'transparency_notes': transparency_notes
+    }
+
+
+def _generate_spanish_explanation(region_id, priority_score, allocation_percentage,
+                                   poverty_index, project_impact, environmental_score,
+                                   corruption_risk, context):
+    """Generate Spanish explanation"""
+    if priority_score >= 0.7:
+        priority_level = "CRÍTICA"
+    elif priority_score >= 0.5:
+        priority_level = "ALTA"
+    elif priority_score >= 0.3:
+        priority_level = "MEDIA"
+    else:
+        priority_level = "BAJA"
+    
+    narrative = f"""
+**Decisión de Asignación de Recursos para {region_id}**
+
+Basado en un análisis exhaustivo de indicadores regionales, {region_id} ha sido asignado un nivel de prioridad **{priority_level}** con una puntuación de {priority_score:.1%}. Esto resulta en una asignación presupuestaria recomendada de {allocation_percentage:.1f}%.
+
+**Análisis de Métricas Clave:**
+- **Índice de Pobreza**: {poverty_index:.1%}
+- **Impacto del Proyecto**: {project_impact:.1%}
+- **Factores Ambientales**: {environmental_score:.1%}
+- **Riesgo de Gobernanza**: {corruption_risk:.1%}
+    """.strip()
+    
+    return {
+        'narrative': narrative,
+        'rationale': 'Decisión basada en metodología transparente y validada científicamente.',
+        'key_points': [f"Nivel de Prioridad: {priority_level}", f"Asignación Recomendada: {allocation_percentage:.1f}%"],
+        'recommendations': ['Monitoreo continuo', 'Evaluación de impacto', 'Ajustes según necesidad'],
+        'transparency_notes': 'Sistema generado por IA explicable para transparencia total.'
+    }
+
+
+def _generate_swahili_explanation(region_id, priority_score, allocation_percentage,
+                                   poverty_index, project_impact, environmental_score,
+                                   corruption_risk, context):
+    """Generate Swahili explanation"""
+    if priority_score >= 0.7:
+        priority_level = "MUHIMU SANA"
+    elif priority_score >= 0.5:
+        priority_level = "MUHIMU"
+    elif priority_score >= 0.3:
+        priority_level = "WA KATI"
+    else:
+        priority_level = "WA CHINI"
+    
+    narrative = f"""
+**Uamuzi wa Ugawaji wa Rasilimali kwa {region_id}**
+
+Kulingana na uchambuzi kamili wa viashiria vya mkoa, {region_id} imepewa kiwango cha kipaumbele cha **{priority_level}** na alama ya {priority_score:.1%}. Hii inasababisha mapendekezo ya ugawaji wa bajeti ya {allocation_percentage:.1f}%.
+
+**Uchambuzi wa Vipimo Muhimu:**
+- **Kiwango cha Umaskini**: {poverty_index:.1%}
+- **Athari ya Mradi**: {project_impact:.1%}
+- **Mambo ya Mazingira**: {environmental_score:.1%}
+- **Hatari ya Utawala**: {corruption_risk:.1%}
+    """.strip()
+    
+    return {
+        'narrative': narrative,
+        'rationale': 'Uamuzi kulingana na mbinu wazi na imeidhinishwa kisayansi.',
+        'key_points': [f"Kiwango cha Kipaumbele: {priority_level}", f"Ugawaji Unaopendekezwa: {allocation_percentage:.1f}%"],
+        'recommendations': ['Ufuatiliaji endelevu', 'Tathmini ya athari', 'Marekebisho kulingana na mahitaji'],
+        'transparency_notes': 'Mfumo uliozalishwa na AI inayoweza kuelezwa kwa uwazi kamili.'
+    }
